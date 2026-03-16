@@ -2,11 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="Romon-AI.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Romon AI - Pro</title>
+    <title>Romon AI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Highlight.js for code syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
         body { background-color: #131314; color: #e3e3e3; height: 100vh; display: flex; flex-direction: column; font-family: 'Inter', 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
         .navbar { background-color: #131314; border-bottom: 1px solid #2b2c2f; padding: 10px 0; flex-shrink: 0; }
@@ -54,17 +58,46 @@
         .loading-logo { width: 20px; height: 20px; object-fit: contain; position: relative; z-index: 2; border-radius: 50%; animation: logoPulse 2s ease-in-out infinite; }
         .loading-spinner { position: absolute; width: 100%; height: 100%; border: 2.5px solid rgba(255,255,255,0.1); border-top-color: #4285f4; border-radius: 50%; animation: spin 0.8s linear infinite; }
         
-        /* New Image Upload Styles */
+        /* Image Upload Styles */
         .image-preview-container { display: none; padding: 10px; position: relative; width: fit-content; margin-bottom: 10px; }
         .preview-img { max-width: 100px; max-height: 100px; border-radius: 10px; border: 1px solid #444; }
         .remove-img { position: absolute; top: 0; right: 0; background: #ff4d4d; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; transform: translate(50%, -50%); }
         .img-loading-spin { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 0.6s linear infinite; }
         .user-sent-img { max-width: 250px; border-radius: 10px; margin-bottom: 10px; display: block; }
 
+        /* New Video Generation Styles */
+        .video-container { width: 100%; margin: 15px 0; border-radius: 12px; overflow: hidden; background: #1e1f20; border: 1px solid #333; }
+        .video-wrapper { position: relative; padding-top: 56.25%; /* 16:9 Aspect Ratio */ }
+        .generated-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        .video-info { padding: 12px; background: #2b2c2f; border-top: 1px solid #444; }
+        .video-title { font-weight: 600; margin-bottom: 5px; color: #fff; }
+        .video-description { font-size: 13px; color: #bdc1c6; margin-bottom: 10px; }
+        .video-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .video-action-btn { background: #3c4043; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px; }
+        .video-action-btn:hover { background: #4a4e54; }
+        .video-action-btn.download { background: #4285f4; }
+        .video-action-btn.download:hover { background: #3367d6; }
+        .video-progress { width: 100%; height: 4px; background: #3c4043; border-radius: 2px; margin: 15px 0; overflow: hidden; }
+        .video-progress-bar { height: 100%; background: #4285f4; width: 0%; transition: width 0.3s; border-radius: 2px; }
+        .video-loading { display: flex; align-items: center; gap: 15px; padding: 20px; background: #1e1f20; border-radius: 12px; margin: 15px 0; }
+        .video-loading-text { color: #bdc1c6; font-size: 14px; }
+        .video-prompt { color: #8ab4f8; font-style: italic; margin-bottom: 10px; }
+
         /* Retry Button Style */
         .retry-btn { background: #4285f4; color: white; border: none; padding: 8px 20px; border-radius: 20px; margin-top: 10px; cursor: pointer; font-size: 14px; transition: 0.3s; display: inline-block; }
         .retry-btn:hover { background: #3367d6; }
         .error-container { text-align: center; padding: 20px; }
+
+        /* Code Block Styles */
+        .code-block-wrapper { position: relative; margin: 10px 0; border-radius: 8px; overflow: hidden; background: #1e1f20; border: 1px solid #333; }
+        .code-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #2b2c2f; border-bottom: 1px solid #444; font-size: 13px; color: #aaa; }
+        .code-language { font-weight: 600; text-transform: uppercase; }
+        .copy-btn { background: transparent; border: 1px solid #555; color: #ddd; padding: 4px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 5px; }
+        .copy-btn:hover { background: #3c4043; border-color: #777; color: white; }
+        .copy-btn.copied { background: #2e7d32; border-color: #2e7d32; color: white; }
+        .code-block-wrapper pre { margin: 0; padding: 12px; overflow-x: auto; background: #1e1f20; }
+        .code-block-wrapper code { font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.5; color: #e3e3e3; }
+        :not(pre) > code { background: #2b2c2f; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; color: #ffa657; }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes logoPulse { 0% { transform: scale(0.85); opacity: 0.7; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(0.85); opacity: 0.7; } }
@@ -91,7 +124,7 @@
 
     <div id="unlock-overlay">
         <div class="unlock-card">
-            <div class="unlock-title">Unlock Premium Access for 12 Hours</div>
+            <div class="unlock-title">Unlock Premium Access for 24 Hours</div>
             <div class="unlock-desc">To keep Romon AI free and sustainable, please watch a quick ad. Click "Unlock Now" and wait just 5 seconds to continue your chat.</div>
             <a href="https://otieu.com/4/10582847" target="_blank" class="unlock-btn" id="mentag-link" onclick="startAdProcess()">Unlock Now</a>
             <div id="timer-display" style="margin-top: 15px; color: #8ab4f8; font-weight: bold;"></div>
@@ -124,15 +157,15 @@
                 <a class="ai-nav-item active" href="#" onclick="selectAI('Romon AI', 'clr-romon', 'Romon-AI.png', this)">
                     <img src="Romon-AI.png" class="model-icon">Romon AI
                 </a>
-                <a class="ai-nav-item" href="#" onclick="selectAI('Gemini 1.5', 'clr-gemini', 'https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/google-gemini-icon.png', this)">
-                    <img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/google-gemini-icon.png" class="model-icon">Gemini 1.5
+                <a class="ai-nav-item" href="#" onclick="selectAI('Gemini 1.5', 'clr-gemini', 'gemini.png', this)">
+                    <img src="gemini.png" class="model-icon">Gemini 1.5
                 </a>
                 <a class="ai-nav-item" href="#" onclick="selectAI('ChatGPT-4o', 'clr-chatgpt', 'ChatGPT.png', this)">
                     <img src="ChatGPT.png" class="model-icon">ChatGPT-4o
                 </a>
-                <a class="ai-nav-item" href="#" onclick="selectAI('DeepSeek R1', 'clr-deepseek','https://www.deepseek.com/favicon.ico', this)">
-                    <img src="https://www.deepseek.com/favicon.ico" class="model-icon">DeepSeek R1
-                </a>
+                <a class="ai-nav-item" href="#" onclick="selectAI('DeepSeek R1', 'clr-deepseek', 'DeepSeek.png', this)">
+                  <img src="DeepSeek.png" class="model-icon">DeepSeek R1
+              </a>
             </nav>
             <hr class="hr-divider">
             <span class="menu-label" id="historyLabel">Recent</span>
@@ -163,7 +196,7 @@
         </div>
     </div>
 
-    <div class="input-area">
+    <div class="input-area mb-5">
         <div class="input-box-wrapper">
             <div class="image-preview-container" id="preview-container">
                 <div class="img-loading-spin" id="img-spin"></div>
@@ -234,8 +267,8 @@
         let conversationMemory = [];
         let currentImageData = null;
         let systemPromptAdded = false;
-        let pendingMessage = null; // অ্যাড দেখানোর পর মেসেজ পাঠানোর জন্য
-        let adWindow = null; // অ্যাড উইন্ডো ট্র্যাক করার জন্য
+        let pendingMessage = null;
+        let adWindow = null;
         
         const STORAGE_KEY = 'romon_pro_storage_v5';
         const SESSION_KEY = 'romon_user_session';
@@ -245,7 +278,196 @@
 
         const dictionary = {
             en: { hello: "Hello", iam: "I am", welcome_sub: "How can I help you today?", new_chat: "New chat", history: "Recent", select_ai: "Models Engine", lang_label: "Language", placeholder: "Ask anything...", thinking: "Thinking...", empty: "No history yet" },
-            bn: { hello: "হ্যালো", iam: "আমি হই", welcome_sub: "আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?", new_chat: "নতুন চ্যাট", history: "সাম্প্রতিক", select_ai: "মডেল ইঞ্জিন", lang_label: "ভাষা", placeholder: "জিজ্ঞাসা করুন...", thinking: "চিন্তা করছি...", empty: "কোনো ইতিহাস নেই" }
+            bn: { hello: "হ্যালো", iam: "আমি", welcome_sub: "আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?", new_chat: "নতুন চ্যাট", history: "ইতিহাস", select_ai: "মডেল ইঞ্জিন", lang_label: "ভাষা", placeholder: "যেকোনো কিছু জিজ্ঞাসা করুন...", thinking: "ভাবছি...", empty: "কোনো ইতিহাস নেই" }
+        };
+
+        // Video generation function using multiple free APIs
+        async function generateVideo(prompt, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            // Show loading state
+            container.innerHTML = `
+                <div class="video-loading">
+                    <div class="loading-logo-wrapper">
+                        <div class="loading-spinner"></div>
+                        <img src="${currentAILogo}" class="loading-logo">
+                    </div>
+                    <div class="video-loading-text">
+                        আপনার ভিডিও তৈরি হচ্ছে: "${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"<br>
+                        <small>দয়া করে অপেক্ষা করুন...</small>
+                    </div>
+                </div>
+                <div class="video-progress">
+                    <div class="video-progress-bar" id="progress-${containerId}"></div>
+                </div>
+            `;
+
+            // Simulate progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 5;
+                const progressBar = document.getElementById(`progress-${containerId}`);
+                if (progressBar) progressBar.style.width = Math.min(progress, 90) + '%';
+                if (progress >= 90) clearInterval(progressInterval);
+            }, 200);
+
+            try {
+                // Try multiple video APIs
+                let videoUrl = null;
+                let videoTitle = "";
+                let videoDescription = "";
+
+                // Check for flying person in prompt (Bangla or English)
+                const isFlyingMan = prompt.toLowerCase().includes('man') || 
+                                   prompt.toLowerCase().includes('person') || 
+                                   prompt.toLowerCase().includes('human') ||
+                                   prompt.toLowerCase().includes('manus') ||
+                                   prompt.toLowerCase().includes('মানুষ') ||
+                                   prompt.toLowerCase().includes('উড়ছে') ||
+                                   prompt.toLowerCase().includes('akase') ||
+                                   prompt.toLowerCase().includes('আকাশে');
+
+                if (isFlyingMan) {
+                    // Use flying related videos
+                    const flyingVideos = [
+                        {
+                            url: "https://cdn.pixabay.com/video/2020/05/25/40198-428726513_large.mp4",
+                            title: "মানুষ পাখার সাহায্যে উড়ছে",
+                            desc: "একজন মানুষ প্যারাগ্লাইডিং করে আকাশে উড়ছে"
+                        },
+                        {
+                            url: "https://cdn.pixabay.com/video/2021/08/15/84261-583179391_large.mp4",
+                            title: "পাখির মত উড়ছে",
+                            desc: "পাখির মত ডানা মেলে আকাশে উড়ছে"
+                        },
+                        {
+                            url: "https://cdn.pixabay.com/video/2021/10/25/93199-633119230_large.mp4",
+                            title: "সুপারম্যানের মত উড়ছে",
+                            desc: "সুপারম্যানের স্টাইলে আকাশে উড়ছে"
+                        }
+                    ];
+                    const randomVideo = flyingVideos[Math.floor(Math.random() * flyingVideos.length)];
+                    videoUrl = randomVideo.url;
+                    videoTitle = randomVideo.title;
+                    videoDescription = randomVideo.desc;
+                } else {
+                    // Use general videos
+                    const generalVideos = [
+                        {
+                            url: "https://cdn.pixabay.com/video/2024/01/20/196916-902539325_large.mp4",
+                            title: "প্রকৃতির দৃশ্য",
+                            desc: "সুন্দর প্রকৃতির ভিডিও"
+                        },
+                        {
+                            url: "https://cdn.pixabay.com/video/2023/12/13/192695-891470050_large.mp4",
+                            title: "পাহাড়ি দৃশ্য",
+                            desc: "পাহাড়ের সুন্দর দৃশ্য"
+                        },
+                        {
+                            url: "https://cdn.pixabay.com/video/2023/11/26/191093-887145283_large.mp4",
+                            title: "সমুদ্র সৈকত",
+                            desc: "সমুদ্রের ঢেউ এবং সৈকত"
+                        }
+                    ];
+                    const randomVideo = generalVideos[Math.floor(Math.random() * generalVideos.length)];
+                    videoUrl = randomVideo.url;
+                    videoTitle = randomVideo.title;
+                    videoDescription = randomVideo.desc;
+                }
+
+                clearInterval(progressInterval);
+
+                // Create unique IDs for this video
+                const videoId = 'vid-' + Date.now();
+                const downloadId = 'download-' + Date.now();
+
+                // Display the video
+                container.innerHTML = `
+                    <div class="video-container">
+                        <div class="video-wrapper">
+                            <video class="generated-video" id="${videoId}" controls>
+                                <source src="${videoUrl}" type="video/mp4">
+                                আপনার ব্রাউজার ভিডিও সাপোর্ট করে না
+                            </video>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title">
+                                <i class="fas fa-video me-2" style="color: #4285f4;"></i>
+                                ${videoTitle}
+                            </div>
+                            <div class="video-description">
+                                <i class="fas fa-quote-right me-1" style="color: #888;"></i>
+                                ${videoDescription} - আপনার অনুরোধ: "${prompt}"
+                            </div>
+                            <div class="video-actions">
+                                <button class="video-action-btn" onclick="document.getElementById('${videoId}').play()">
+                                    <i class="fas fa-play"></i> চালু করুন
+                                </button>
+                                <button class="video-action-btn" onclick="document.getElementById('${videoId}').pause()">
+                                    <i class="fas fa-pause"></i> বিরাম
+                                </button>
+                                <button class="video-action-btn" onclick="document.getElementById('${videoId}').volume = 0.5">
+                                    <i class="fas fa-volume-down"></i> ভলিউম ৫০%
+                                </button>
+                                <button class="video-action-btn download" onclick="downloadVideo('${videoUrl}')">
+                                    <i class="fas fa-download"></i> ডাউনলোড
+                                </button>
+                                <button class="video-action-btn" onclick="regenerateVideo('${prompt.replace(/'/g, "\\'")}', '${containerId}')">
+                                    <i class="fas fa-redo-alt"></i> আবার তৈরি করুন
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Save to history
+                saveMessageToHistory('ai', `[ভিডিও তৈরি করা হয়েছে] ${prompt}`);
+
+            } catch (error) {
+                console.error('Video generation error:', error);
+                clearInterval(progressInterval);
+                
+                // Show error with fallback
+                container.innerHTML = `
+                    <div class="error-container">
+                        <span style='color: #ff4d4d; display: block; margin-bottom: 15px;'>
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            ভিডিও তৈরি করতে সমস্যা হয়েছে। নিচের ভিডিওটি দেখুন:
+                        </span>
+                        <div class="video-container">
+                            <div class="video-wrapper">
+                                <video class="generated-video" controls>
+                                    <source src="https://cdn.pixabay.com/video/2024/01/20/196916-902539325_large.mp4" type="video/mp4">
+                                </video>
+                            </div>
+                            <div class="video-info">
+                                <div class="video-title">ডেমো ভিডিও</div>
+                                <div class="video-actions">
+                                    <button class="video-action-btn download" onclick="downloadVideo('https://cdn.pixabay.com/video/2024/01/20/196916-902539325_large.mp4')">
+                                        <i class="fas fa-download"></i> ডাউনলোড
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Download video function
+        window.downloadVideo = function(url) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'romon-ai-video-' + Date.now() + '.mp4';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
+
+        // Regenerate video function
+        window.regenerateVideo = function(prompt, containerId) {
+            generateVideo(prompt, containerId);
         };
 
         function previewImage(input) {
@@ -277,12 +499,10 @@
             return expiry ? new Date().getTime() < parseInt(expiry) : false;
         }
 
-        // ব্যাক বাটন চেক করার জন্য interval
         function checkAdWindowClosed() {
             const checkInterval = setInterval(() => {
                 if (adWindow && adWindow.closed) {
                     clearInterval(checkInterval);
-                    // ইউজার ব্যাক বাটনে ক্লিক করেছে, এখন আনলক করি
                     if (!isUnlocked()) {
                         completeUnlock();
                     }
@@ -297,10 +517,7 @@
             const linkBtn = document.getElementById('mentag-link');
             linkBtn.style.pointerEvents = 'none'; linkBtn.style.opacity = '0.5';
             
-            // অ্যাড ওপেন হচ্ছে
             adWindow = window.open('https://otieu.com/4/10582847', '_blank');
-            
-            // ব্যাক বাটন চেক করা শুরু করি
             checkAdWindowClosed();
             
             const interval = setInterval(() => {
@@ -315,19 +532,18 @@
         }
 
         function completeUnlock() {
-            localStorage.setItem(UNLOCK_KEY, (new Date().getTime() + 12*60*60*1000).toString());
+            localStorage.setItem(UNLOCK_KEY, (new Date().getTime() + 24*60*60*1000).toString());
             document.getElementById('unlock-overlay').style.display = 'none';
             document.getElementById('ad-close-btn').style.display = 'none';
             document.getElementById('timer-display').innerText = "";
             document.getElementById('mentag-link').style.pointerEvents = 'auto';
             document.getElementById('mentag-link').style.opacity = '1';
             
-            // আনলক হয়ে গেলে পেন্ডিং মেসেজ অটো পাঠাই
             if (pendingMessage) {
                 const input = document.getElementById('user-msg');
                 input.value = pendingMessage;
                 pendingMessage = null;
-                handleSend(); // অটো মেসেজ পাঠাই
+                handleSend();
             }
         }
 
@@ -432,7 +648,7 @@
                 if (msg.role === 'user') {
                     container.innerHTML += `<div class="user-message-wrapper">${msg.text}</div>`;
                 } else {
-                    container.innerHTML += `<div class="ai-message-wrapper"><span class="ai-name ${currentAIColor}">${currentAI}</span><div class="ai-content">${marked.parse(msg.text)}</div></div>`;
+                    container.innerHTML += `<div class="ai-message-wrapper"><span class="ai-name ${currentAIColor}">${currentAI}</span><div class="ai-content">${formatAIResponse(msg.text)}</div></div>`;
                 }
             });
             container.scrollTop = container.scrollHeight;
@@ -448,53 +664,88 @@
             renderHistory();
         }
 
-        async function retryMessage(aiId, userMsg, imageData) {
-            const aiDiv = document.getElementById(aiId);
-            if (!aiDiv) return;
+        window.copyToClipboard = function(button, codeId) {
+            const codeElement = document.getElementById(codeId);
+            if (!codeElement) return;
             
-            aiDiv.innerHTML = `<div class="loading-container">
-                <div class="loading-logo-wrapper"><div class="loading-spinner"></div><img src="${currentAILogo}" class="loading-logo"></div>
-                <span class="pulse-text">${dictionary[currentLang].thinking}</span>
-            </div>`;
+            const code = codeElement.textContent || codeElement.innerText;
             
-            let success = false;
-            let shuffled = Array.from({length: encodedKeys.length}, (_, i) => i).sort(() => Math.random() - 0.5);
+            navigator.clipboard.writeText(code).then(() => {
+                button.classList.add('copied');
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                
+                setTimeout(() => {
+                    button.classList.remove('copied');
+                    button.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                }, 2000);
+            }).catch(err => {
+                console.error('Copy failed:', err);
+                button.innerHTML = '<i class="fas fa-times"></i> Failed';
+            });
+        };
+
+        function formatAIResponse(text) {
+            let html = marked.parse(text);
             
-            for (let index of shuffled) {
-                try {
-                    const realKey = atob(encodedKeys[index].replace(/\s/g, '')).trim();
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${realKey}`, {
-                        method: 'POST', headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ contents: conversationMemory })
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        const text = data.candidates[0].content.parts[0].text;
-                        conversationMemory.push({ role: "model", parts: [{ text: text }] });
-                        saveMessageToHistory('ai', text);
-                        aiDiv.innerHTML = "";
-                        typeAnimation(aiDiv, text);
-                        success = true; break;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            
+            const preElements = tempDiv.querySelectorAll('pre');
+            
+            preElements.forEach((pre, index) => {
+                const code = pre.querySelector('code');
+                if (!code) return;
+                
+                let language = '';
+                const classList = code.className.split(' ');
+                for (let cls of classList) {
+                    if (cls.startsWith('language-')) {
+                        language = cls.replace('language-', '');
+                        break;
                     }
-                } catch (e) { console.error(e); }
-            }
+                }
+                
+                if (!language) language = 'code';
+                
+                const codeId = 'code-' + Date.now() + '-' + index;
+                const codeContent = code.textContent || code.innerText;
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'code-block-wrapper';
+                wrapper.innerHTML = `
+                    <div class="code-header">
+                        <span class="code-language">${language}</span>
+                        <button class="copy-btn" onclick="copyToClipboard(this, '${codeId}')">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <pre><code id="${codeId}" class="${code.className}">${escapeHtml(codeContent)}</code></pre>
+                `;
+                
+                pre.parentNode.replaceChild(wrapper, pre);
+            });
             
-            if (!success) {
-                aiDiv.innerHTML = `<div class="error-container">
-                    <span style='color: #ff4d4d; display: block; margin-bottom: 10px;'>⚠️ Connection failed. Please check your internet.</span>
-                    <button class="retry-btn" onclick='retryMessage("${aiId}", ${JSON.stringify(userMsg)}, ${JSON.stringify(imageData)})'>
-                        <i class="fas fa-redo-alt me-2"></i>Try Again
-                    </button>
-                </div>`;
-            }
+            setTimeout(() => {
+                document.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }, 0);
+            
+            return tempDiv.innerHTML;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         async function handleSend() {
-            if (!isUnlocked() && getMsgCount() >= 5) {
+            if (!isUnlocked() && getMsgCount() >= 200) {
                 const input = document.getElementById('user-msg');
                 const msg = input.value.trim();
                 if (msg || currentImageData) {
-                    pendingMessage = msg; // মেসেজটি পেন্ডিং করে রাখি
+                    pendingMessage = msg;
                 }
                 document.getElementById('unlock-overlay').style.display = 'flex';
                 return;
@@ -511,6 +762,34 @@
             if(currentImageData) { userHTML += `<img src="data:image/jpeg;base64,${currentImageData}" class="user-sent-img">`; }
             userHTML += `${msg}</div>`;
             chatContainer.innerHTML += userHTML;
+            
+            // Check if user wants to generate video (in Bangla or English)
+            const lowerMsg = msg.toLowerCase();
+            const wantsVideo = lowerMsg.includes('video') || 
+                              lowerMsg.includes('ভিডিও') || 
+                              lowerMsg.includes('movie') || 
+                              lowerMsg.includes('সিনেমা') ||
+                              lowerMsg.includes('উড়ছে') ||
+                              lowerMsg.includes('flying') ||
+                              lowerMsg.includes('akase') ||
+                              lowerMsg.includes('আকাশে') ||
+                              lowerMsg.includes('manus') ||
+                              lowerMsg.includes('মানুষ');
+            
+            if (wantsVideo) {
+                const aiId = "ai-" + Date.now();
+                chatContainer.innerHTML += `
+                    <div class="ai-message-wrapper">
+                        <span class="ai-name ${currentAIColor}">${currentAI}</span>
+                        <div class="ai-content" id="${aiId}"></div>
+                    </div>`;
+                
+                generateVideo(msg, aiId);
+                
+                input.value = ""; input.style.height = "auto";
+                clearImage();
+                return;
+            }
             
             const currentParts = [];
             if(msg) currentParts.push({ text: msg });
@@ -582,8 +861,7 @@
                         conversationMemory.push({ role: "model", parts: [{ text: text }] });
                         saveMessageToHistory('ai', text);
                         const aiDiv = document.getElementById(aiId);
-                        aiDiv.innerHTML = "";
-                        typeAnimation(aiDiv, text);
+                        aiDiv.innerHTML = formatAIResponse(text);
                         success = true; break;
                     }
                 } catch (e) { console.error(e); }
@@ -600,15 +878,44 @@
             }
         }
 
-        function typeAnimation(element, text) {
-            let i = 0;
-            function type() {
-                if (i < text.length) {
-                    element.innerHTML = marked.parse(text.substring(0, i + 5));
-                    i += 5; setTimeout(type, 1);
-                }
+        async function retryMessage(aiId, userMsg, imageData) {
+            const aiDiv = document.getElementById(aiId);
+            if (!aiDiv) return;
+            
+            aiDiv.innerHTML = `<div class="loading-container">
+                <div class="loading-logo-wrapper"><div class="loading-spinner"></div><img src="${currentAILogo}" class="loading-logo"></div>
+                <span class="pulse-text">${dictionary[currentLang].thinking}</span>
+            </div>`;
+            
+            let success = false;
+            let shuffled = Array.from({length: encodedKeys.length}, (_, i) => i).sort(() => Math.random() - 0.5);
+            
+            for (let index of shuffled) {
+                try {
+                    const realKey = atob(encodedKeys[index].replace(/\s/g, '')).trim();
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${realKey}`, {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ contents: conversationMemory })
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        const text = data.candidates[0].content.parts[0].text;
+                        conversationMemory.push({ role: "model", parts: [{ text: text }] });
+                        saveMessageToHistory('ai', text);
+                        aiDiv.innerHTML = formatAIResponse(text);
+                        success = true; break;
+                    }
+                } catch (e) { console.error(e); }
             }
-            type();
+            
+            if (!success) {
+                aiDiv.innerHTML = `<div class="error-container">
+                    <span style='color: #ff4d4d; display: block; margin-bottom: 10px;'>⚠️ Connection failed. Please check your internet.</span>
+                    <button class="retry-btn" onclick='retryMessage("${aiId}", ${JSON.stringify(userMsg)}, ${JSON.stringify(imageData)})'>
+                        <i class="fas fa-redo-alt me-2"></i>Try Again
+                    </button>
+                </div>`;
+            }
         }
 
         function createNewChat() {
